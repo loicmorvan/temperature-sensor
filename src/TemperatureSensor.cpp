@@ -21,33 +21,22 @@ TemperatureSensor::TemperatureSensor()
     sensor->requestTemperatures();
 }
 
-void TemperatureSensor::WaitForData()
+FloatValue TemperatureSensor::GetTemperature()
 {
-    auto start = millis();
     sensor->requestTemperatures();
 
-    // wait for data AND detect disconnect
     uint32_t timeout = millis();
     while (!sensor->isConversionComplete())
     {
         if (millis() - timeout >= 800) // check for timeout
         {
             Serial.println("ERROR: timeout or disconnect");
-            break;
+            return {
+                .HasValue = false};
         }
     }
 
-    float t = sensor->getTempC();
-
-    if (t == DEVICE_CRC_ERROR)
-    {
-        Serial.println("ERROR: CRC error");
-    }
-    auto stop = millis();
-
-    Serial.print(12);
-    Serial.print("\t");
-    Serial.print(stop - start);
-    Serial.print("\t");
-    Serial.println(t, 1); // 1 decimal makes perfect sense
+    return {
+        .HasValue = true,
+        .Value = sensor->getTempC()};
 }

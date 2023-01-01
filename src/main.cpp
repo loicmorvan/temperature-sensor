@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <TemperatureSensor.h>
 #include <WiFi.h>
+#include <HomeKitAccessory.h>
 
 #include "credentials.h"
 
 TemperatureSensor *temperatureSensor;
+HomeKitAccessory *homeKitAccessory;
 uint32_t start, stop;
 
 void setup()
@@ -19,10 +21,27 @@ void setup()
 	}
 
 	temperatureSensor = new TemperatureSensor();
+	homeKitAccessory = new HomeKitAccessory();
 }
 
 void loop()
 {
-	temperatureSensor->WaitForData();
+	auto temperature = temperatureSensor->GetTemperature();
+	if (temperature.HasValue)
+	{
+		if (homeKitAccessory->IsConnected())
+		{
+			homeKitAccessory->SetTemperature(temperature.Value);
+		}
+		else
+		{
+			Serial.write("HomeKit accessory is not connected.");
+		}
+	}
+	else
+	{
+		Serial.write("Temperature sensor is not connected.");
+	}
+
 	delay(1000);
 }

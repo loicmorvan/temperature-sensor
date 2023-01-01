@@ -3,6 +3,11 @@
 
 #define ONE_WIRE_BUS 2
 
+struct FloatValue {
+    bool HasValue;
+    float Value;
+};
+
 class TemperatureSensor {
     private:
         OneWire* oneWire;
@@ -10,6 +15,5 @@ class TemperatureSensor {
 
     public:
         TemperatureSensor();
-
-        void WaitForData();
+        FloatValue GetTemperature();
 };
