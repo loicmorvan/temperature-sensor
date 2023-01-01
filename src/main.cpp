@@ -16,8 +16,8 @@ void setup()
 	WiFi.begin(SSID, PASSWORD);
 	while (WiFi.status() != WL_CONNECTED)
 	{
-		delay(1000);
 		Serial.println("Establishing connection to WiFi..");
+		delay(1000);
 	}
 
 	temperatureSensor = new TemperatureSensor();
@@ -29,18 +29,11 @@ void loop()
 	auto temperature = temperatureSensor->GetTemperature();
 	if (temperature.HasValue)
 	{
-		if (homeKitAccessory->IsConnected())
-		{
-			homeKitAccessory->SetTemperature(temperature.Value);
-		}
-		else
-		{
-			Serial.write("HomeKit accessory is not connected.");
-		}
+		//homeKitAccessory->SetTemperature(temperature.Value);
 	}
 	else
 	{
-		Serial.write("Temperature sensor is not connected.");
+		Serial.println("Temperature sensor is not connected.");
 	}
 
 	delay(1000);

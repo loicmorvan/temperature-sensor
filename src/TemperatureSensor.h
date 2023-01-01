@@ -1,7 +1,7 @@
 #include <OneWire.h>
 #include <DS18B20.h>
 
-#define ONE_WIRE_BUS 2
+#define ONE_WIRE_BUS 32
 
 struct FloatValue {
     bool HasValue;
