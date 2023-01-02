@@ -7,7 +7,6 @@
 
 TemperatureSensor *temperatureSensor;
 HomeKitAccessory *homeKitAccessory;
-uint32_t start, stop;
 
 void setup()
 {
@@ -16,20 +15,35 @@ void setup()
 	WiFi.begin(SSID, PASSWORD);
 	while (WiFi.status() != WL_CONNECTED)
 	{
-		Serial.println("Establishing connection to WiFi..");
+		Serial.println("Establishing connection to WiFi...");
 		delay(1000);
 	}
+	Serial.write("WiFi connected with IP: ");
+	Serial.println(WiFi.localIP());
 
+	Serial.println();
+
+	Serial.println("Creating temperature sensor...");
 	temperatureSensor = new TemperatureSensor();
+	Serial.println("Temperature sensor created.");
+
+	Serial.println();
+
+	Serial.println("Creating HomeKit accessory...");
 	homeKitAccessory = new HomeKitAccessory();
+	Serial.println("HomeKit accessory created.");
+
+	Serial.println("======== Setup finished!");
 }
 
 void loop()
 {
+	Serial.println("=== Loop!");
+
 	auto temperature = temperatureSensor->GetTemperature();
 	if (temperature.HasValue)
 	{
-		//homeKitAccessory->SetTemperature(temperature.Value);
+		homeKitAccessory->SetTemperature(temperature.Value);
 	}
 	else
 	{

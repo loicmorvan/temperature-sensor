@@ -1,8 +1,17 @@
 #include "HomeKitAccessory.h"
-
-#include <ESP32HomeKit.h>
+#include <Arduino.h>
 
 static int identify(hap_acc_t *ha)
+{
+	return HAP_SUCCESS;
+}
+
+static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void *read_priv)
+{
+	return HAP_SUCCESS;
+}
+
+static int write(hap_write_data_t write_data[], int count, void *serv_priv, void *write_priv)
 {
 	return HAP_SUCCESS;
 }
@@ -38,23 +47,27 @@ HomeKitAccessory::HomeKitAccessory()
 	hap_serv_t *service = hap_serv_temperature_sensor_create(20);
 	hap_serv_add_char(service, hap_char_name_create("Temperature sensor"));
 
-	// hap_serv_set_write_cb(service, fan_write);
-	// hap_serv_set_read_cb(service, fan_read);
+	hap_serv_set_write_cb(service, write);
+	hap_serv_set_read_cb(service, read);
 
 	hap_acc_add_serv(accessory, service);
 	hap_add_accessory(accessory);
 
-	// ESP_LOGI(TAG, "Accessory is paired with %d controllers",
-	// 		 hap_get_paired_controller_count());
+	Serial.write("Accessory is paired with num controllers: ");
+	Serial.println(hap_get_paired_controller_count());
 
 	hap_set_setup_code("111-22-333");
 	hap_set_setup_id("TEMP");
 	hap_start();
+
+	temperatureCharacteristic = hap_char_name_create(HAP_CHAR_UUID_CURRENT_TEMPERATURE);
 }
 
 void HomeKitAccessory::SetTemperature(const float &value)
 {
-	hap_val_t *val = new hap_val_t();
-	val->f = value;
-	hap_char_update_val(hap_char_name_create("temperature"), val);
+	hap_val_t val = {
+		.f = value
+	};
+
+	hap_char_update_val(temperatureCharacteristic, &val);
 }
