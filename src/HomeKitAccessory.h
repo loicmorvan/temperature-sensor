@@ -1,11 +1,16 @@
 #include <ESP32HomeKit.h>
 
-class HomeKitAccessory {
-    private:
-        hap_char_t *temperatureCharacteristic;
+class HomeKitAccessory
+{
+private:
+    hap_char_t *temperatureCharacteristic;
 
-    public:
-        HomeKitAccessory();
+public:
+    HomeKitAccessory();
 
-        void SetTemperature(const float &value);
+    void SetTemperature(const float &value);
+
+private:
+    hap_serv_t *create_temperature_service();
+    hap_acc_t *create_accessory();
 };

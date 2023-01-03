@@ -43,6 +43,9 @@ void loop()
 	auto temperature = temperatureSensor->GetTemperature();
 	if (temperature.HasValue)
 	{
+		Serial.write("Temperature °C: ");
+		Serial.println(temperature.Value);
+		
 		homeKitAccessory->SetTemperature(temperature.Value);
 	}
 	else
