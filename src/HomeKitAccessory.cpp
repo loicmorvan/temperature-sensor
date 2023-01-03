@@ -1,6 +1,10 @@
 #include "HomeKitAccessory.h"
 #include <Arduino.h>
 
+using namespace std::placeholders;
+
+static float currentTemperature;
+
 static int identify(hap_acc_t *ha)
 {
 	return HAP_SUCCESS;
@@ -8,22 +12,37 @@ static int identify(hap_acc_t *ha)
 
 static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void *read_priv)
 {
-	return HAP_SUCCESS;
-}
+	auto controllerId = hap_req_get_ctrl_id(read_priv);
+	if (controllerId)
+	{
+		Serial.write("Received read from ");
+		Serial.println(hap_req_get_ctrl_id(read_priv));
+	}
 
-static int write(hap_write_data_t write_data[], int count, void *serv_priv, void *write_priv)
-{
+	auto characteristic = hap_char_get_type_uuid(hc);
+	Serial.write("Characteristic requested: ");
+	Serial.println(characteristic);
+
+	if (!strcmp(characteristic, HAP_CHAR_UUID_CURRENT_TEMPERATURE))
+	{
+		auto cur_val = hap_char_get_val(hc);
+
+		hap_val_t new_val = {
+			.f = currentTemperature,
+		};
+		hap_char_update_val(hc, &new_val);
+		*status_code = HAP_STATUS_SUCCESS;
+	}
+
 	return HAP_SUCCESS;
 }
 
 hap_serv_t *HomeKitAccessory::create_temperature_service()
 {
-	/* Create the Temperature Service. Include the "name" since this is a user visible service  */
 	hap_serv_t *service = hap_serv_temperature_sensor_create(0);
-	this->temperatureCharacteristic = hap_char_name_create("Temperature");
-	hap_serv_add_char(service, temperatureCharacteristic);
+	auto sensorName = hap_char_name_create("Capteur de température");
+	hap_serv_add_char(service, sensorName);
 
-	hap_serv_set_write_cb(service, write);
 	hap_serv_set_read_cb(service, read);
 
 	return service;
@@ -34,7 +53,7 @@ hap_acc_t *HomeKitAccessory::create_accessory()
 	hap_acc_cfg_t cfg = {
 		.name = "Temperature sensor",
 		.model = "DS18B20",
-		.manufacturer = "Loic Morvan",
+		.manufacturer = "Loïc Morvan",
 		.serial_num = "112233445566",
 		.fw_rev = "0.0.1",
 		.hw_rev = NULL,
@@ -43,13 +62,13 @@ hap_acc_t *HomeKitAccessory::create_accessory()
 		.identify_routine = identify,
 	};
 
-	hap_acc_t *accessory = hap_acc_create(&cfg);
+	auto accessory = hap_acc_create(&cfg);
 
 	/* Add a dummy Product Data */
 	uint8_t product_data[] = {'E', 'S', 'P', '3', '2', 'K', 'I', 'T'};
 	hap_acc_add_product_data(accessory, product_data, sizeof(product_data));
 
-	hap_serv_t *service = create_temperature_service();
+	auto service = create_temperature_service();
 	hap_acc_add_serv(accessory, service);
 
 	return accessory;
@@ -78,9 +97,5 @@ HomeKitAccessory::HomeKitAccessory()
 
 void HomeKitAccessory::SetTemperature(const float &value)
 {
-	hap_val_t val = {
-		.f = value,
-	};
-
-	hap_char_update_val(temperatureCharacteristic, &val);
+	currentTemperature = value;
 }

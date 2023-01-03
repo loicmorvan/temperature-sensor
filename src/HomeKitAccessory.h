@@ -2,9 +2,6 @@
 
 class HomeKitAccessory
 {
-private:
-    hap_char_t *temperatureCharacteristic;
-
 public:
     HomeKitAccessory();
 
