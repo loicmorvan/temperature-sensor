@@ -12,21 +12,12 @@ static int identify(hap_acc_t *ha)
 
 static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void *read_priv)
 {
-	auto controllerId = hap_req_get_ctrl_id(read_priv);
-	if (controllerId)
-	{
-		Serial.write("Received read from ");
-		Serial.println(hap_req_get_ctrl_id(read_priv));
-	}
-
 	auto characteristic = hap_char_get_type_uuid(hc);
-	Serial.write("Characteristic requested: ");
-	Serial.println(characteristic);
-
 	if (!strcmp(characteristic, HAP_CHAR_UUID_CURRENT_TEMPERATURE))
 	{
 		auto cur_val = hap_char_get_val(hc);
 
+		// TODO: Do we need that? because the characteristic is updated in SetTemperature.
 		hap_val_t new_val = {
 			.f = currentTemperature,
 		};
