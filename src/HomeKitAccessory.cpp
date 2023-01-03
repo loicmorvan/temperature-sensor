@@ -68,7 +68,7 @@ hap_acc_t *HomeKitAccessory::create_accessory()
 	uint8_t product_data[] = {'E', 'S', 'P', '3', '2', 'K', 'I', 'T'};
 	hap_acc_add_product_data(accessory, product_data, sizeof(product_data));
 
-	auto service = create_temperature_service();
+	service = create_temperature_service();
 	hap_acc_add_serv(accessory, service);
 
 	return accessory;
@@ -78,7 +78,7 @@ HomeKitAccessory::HomeKitAccessory()
 {
 	hap_cfg_t hap_cfg;
 	hap_get_config(&hap_cfg);
-	hap_cfg.unique_param = UNIQUE_NAME;
+	hap_cfg.unique_param = UNIQUE_NONE;
 	hap_set_config(&hap_cfg);
 
 	hap_init(HAP_TRANSPORT_WIFI);
@@ -98,4 +98,10 @@ HomeKitAccessory::HomeKitAccessory()
 void HomeKitAccessory::SetTemperature(const float &value)
 {
 	currentTemperature = value;
+
+	auto hc = hap_serv_get_char_by_uuid(service, HAP_CHAR_UUID_CURRENT_TEMPERATURE);
+	hap_val_t new_val = {
+		.f = currentTemperature,
+	};
+	hap_char_update_val(hc, &new_val);
 }

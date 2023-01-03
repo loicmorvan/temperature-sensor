@@ -2,6 +2,9 @@
 
 class HomeKitAccessory
 {
+private:
+    hap_serv_t *service;
+
 public:
     HomeKitAccessory();
 
