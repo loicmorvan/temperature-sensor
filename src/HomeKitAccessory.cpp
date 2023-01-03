@@ -10,11 +10,40 @@ static int identify(hap_acc_t *ha)
 	return HAP_SUCCESS;
 }
 
+static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void *read_priv)
+{
+	auto controllerId = hap_req_get_ctrl_id(read_priv);
+	if (controllerId)
+	{
+		Serial.write("Received read from ");
+		Serial.println(hap_req_get_ctrl_id(read_priv));
+	}
+
+	auto characteristic = hap_char_get_type_uuid(hc);
+	Serial.write("Characteristic requested: ");
+	Serial.println(characteristic);
+
+	if (!strcmp(characteristic, HAP_CHAR_UUID_CURRENT_TEMPERATURE))
+	{
+		auto cur_val = hap_char_get_val(hc);
+
+		hap_val_t new_val = {
+			.f = currentTemperature,
+		};
+		hap_char_update_val(hc, &new_val);
+		*status_code = HAP_STATUS_SUCCESS;
+	}
+
+	return HAP_SUCCESS;
+}
+
 hap_serv_t *HomeKitAccessory::create_temperature_service()
 {
 	hap_serv_t *service = hap_serv_temperature_sensor_create(0);
 	auto sensorName = hap_char_name_create("Capteur de température");
 	hap_serv_add_char(service, sensorName);
+
+	hap_serv_set_read_cb(service, read);
 
 	return service;
 }
