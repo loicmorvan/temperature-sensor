@@ -98,3 +98,8 @@ void HomeKitAccessory::SetTemperature(const float &value)
 	};
 	hap_char_update_val(hc, &new_val);
 }
+
+void HomeKitAccessory::ResetPairings() const
+{
+	hap_reset_pairings();
+}

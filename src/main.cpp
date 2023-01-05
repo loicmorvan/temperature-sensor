@@ -12,8 +12,6 @@ HomeKitAccessory *homeKitAccessory;
 
 void setup()
 {
-	// TODO: Understand what files are written by HomeKit and how to reset everything.
-
 	Serial.begin(115200);
 
 	WiFi.begin(SSID, PASSWORD);
@@ -37,11 +35,19 @@ void setup()
 	homeKitAccessory = new HomeKitAccessory();
 	Serial.println("HomeKit accessory created.");
 
+	pinMode(14, INPUT);
+
 	Serial.println("======== Setup finished!");
 }
 
 void loop()
 {
+	if (digitalRead(14) == HIGH)
+	{
+		Serial.println("Button pushed!");
+		homeKitAccessory->ResetPairings();
+	}
+
 	Serial.println("=== Loop!");
 
 	auto temperature = temperatureSensor->GetTemperature();
