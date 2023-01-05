@@ -1,4 +1,4 @@
-#include <ESP32HomeKit.h>
+#include <ESP32HomeKit.h> // TODO: Avoid including HomeKit everywhere this class is used.
 
 class HomeKitAccessory
 {

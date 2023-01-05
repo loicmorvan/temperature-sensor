@@ -8,8 +8,12 @@
 TemperatureSensor *temperatureSensor;
 HomeKitAccessory *homeKitAccessory;
 
+// TODO: Cure output.
+
 void setup()
 {
+	// TODO: Understand what files are written by HomeKit and how to reset everything.
+
 	Serial.begin(115200);
 
 	WiFi.begin(SSID, PASSWORD);

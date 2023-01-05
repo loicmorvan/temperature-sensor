@@ -3,10 +3,12 @@
 
 using namespace std::placeholders;
 
+// TODO: Remove
 static float currentTemperature;
 
 static int identify(hap_acc_t *ha)
 {
+	// TODO: Find out what this is.
 	return HAP_SUCCESS;
 }
 
