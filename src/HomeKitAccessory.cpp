@@ -88,9 +88,6 @@ HomeKitAccessory::HomeKitAccessory()
 	auto accessory = pimpl->create_accessory();
 	hap_add_accessory(accessory);
 
-	Serial.write("Accessory is paired with num controllers: ");
-	Serial.println(hap_get_paired_controller_count());
-
 	hap_set_setup_code("111-22-333");
 	hap_set_setup_id("TEMP");
 
