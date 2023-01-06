@@ -10,9 +10,6 @@ public:
 	hap_acc_t *create_accessory();
 };
 
-// TODO: Remove
-static float currentTemperature;
-
 static int identify(hap_acc_t *ha)
 {
 	// TODO: Find out what this is.
@@ -25,10 +22,8 @@ static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void
 	if (!strcmp(characteristic, HAP_CHAR_UUID_CURRENT_TEMPERATURE))
 	{
 		auto cur_val = hap_char_get_val(hc);
-
-		// TODO: Do we need that? because the characteristic is updated in SetTemperature.
 		hap_val_t new_val = {
-			.f = currentTemperature,
+			.f = cur_val->f,
 		};
 		hap_char_update_val(hc, &new_val);
 		*status_code = HAP_STATUS_SUCCESS;
@@ -96,11 +91,9 @@ HomeKitAccessory::HomeKitAccessory()
 
 void HomeKitAccessory::SetTemperature(const float &value)
 {
-	currentTemperature = value;
-
 	auto hc = hap_serv_get_char_by_uuid(pimpl->service, HAP_CHAR_UUID_CURRENT_TEMPERATURE);
 	hap_val_t new_val = {
-		.f = currentTemperature,
+		.f = value,
 	};
 	hap_char_update_val(hc, &new_val);
 }
