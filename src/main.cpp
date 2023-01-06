@@ -44,5 +44,7 @@ void loop()
 		// Temperature sensor lost
 	}
 
-	delay(1000);
+	// Wait for 10s, need to find a way to check temperature at 0.1Hz,
+	// but still listen for the button at a higher framerate.
+	delay(10000);
 }

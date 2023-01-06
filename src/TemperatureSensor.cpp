@@ -12,7 +12,7 @@ TemperatureSensor::TemperatureSensor()
             ; // wait until device comes available.
     }
 
-    sensor->setResolution(12);
+    sensor->setResolution(9);
     sensor->setConfig(DS18B20_CRC);
     sensor->requestTemperatures();
 }
