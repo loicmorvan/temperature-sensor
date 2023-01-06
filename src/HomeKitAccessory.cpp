@@ -1,7 +1,14 @@
 #include "HomeKitAccessory.h"
 #include <Arduino.h>
+#include <ESP32HomeKit.h>
 
-using namespace std::placeholders;
+class HomeKitAccessory::Pimpl
+{
+public:
+	hap_serv_t *service;
+	hap_serv_t *create_temperature_service();
+	hap_acc_t *create_accessory();
+};
 
 // TODO: Remove
 static float currentTemperature;
@@ -30,7 +37,7 @@ static int read(hap_char_t *hc, hap_status_t *status_code, void *serv_priv, void
 	return HAP_SUCCESS;
 }
 
-hap_serv_t *HomeKitAccessory::create_temperature_service()
+hap_serv_t *HomeKitAccessory::Pimpl::create_temperature_service()
 {
 	hap_serv_t *service = hap_serv_temperature_sensor_create(0);
 	auto sensorName = hap_char_name_create("Capteur de température");
@@ -41,7 +48,7 @@ hap_serv_t *HomeKitAccessory::create_temperature_service()
 	return service;
 }
 
-hap_acc_t *HomeKitAccessory::create_accessory()
+hap_acc_t *HomeKitAccessory::Pimpl::create_accessory()
 {
 	hap_acc_cfg_t cfg = {
 		.name = "Temperature sensor",
@@ -69,6 +76,8 @@ hap_acc_t *HomeKitAccessory::create_accessory()
 
 HomeKitAccessory::HomeKitAccessory()
 {
+	pimpl = new Pimpl();
+
 	hap_cfg_t hap_cfg;
 	hap_get_config(&hap_cfg);
 	hap_cfg.unique_param = UNIQUE_NONE;
@@ -76,7 +85,7 @@ HomeKitAccessory::HomeKitAccessory()
 
 	hap_init(HAP_TRANSPORT_WIFI);
 
-	auto accessory = create_accessory();
+	auto accessory = pimpl->create_accessory();
 	hap_add_accessory(accessory);
 
 	Serial.write("Accessory is paired with num controllers: ");
@@ -92,7 +101,7 @@ void HomeKitAccessory::SetTemperature(const float &value)
 {
 	currentTemperature = value;
 
-	auto hc = hap_serv_get_char_by_uuid(service, HAP_CHAR_UUID_CURRENT_TEMPERATURE);
+	auto hc = hap_serv_get_char_by_uuid(pimpl->service, HAP_CHAR_UUID_CURRENT_TEMPERATURE);
 	hap_val_t new_val = {
 		.f = currentTemperature,
 	};
