@@ -9,7 +9,7 @@ This temperature sensor uses these components:
 - A resistor.
 - A button.
 
-![Temperature sensor schema](./docs/Schematic_TemperatureSensor_2023-01-06.png)
+![Temperature sensor schema](./docs/Schematic_TemperatureSensor_2023-01-07.svg)
 
 ## States
 
