@@ -15,29 +15,43 @@ This temperature sensor uses these components:
 
 ```mermaid
 stateDiagram-v2
-    state Booting {
-        [*] --> ConnectingWiFi
-        ConnectingWiFi --> CreatingTemperatureSensor: WiFi connected
-        ConnectingWiFi --> [*]: WiFi not connected
-        CreatingTemperatureSensor --> CreatingHomeKitAccessory: Temperature sensor created
-        CreatingTemperatureSensor --> [*]: Temperature sensor error
-        CreatingHomeKitAccessory --> [*]: HomeKit accessory created
-    }
-    state Running {
-        [*] --> HandleButton
-        HandleButton --> GetTemperature: No button pressed
-        HandleButton --> [*]: Button pressed
-        GetTemperature --> SetTemperature: Temperature received
-        GetTemperature --> Wait: Temperature not received
-        SetTemperature --> Wait
-        Wait --> GetTemperature
+    state "Connecting WiFi" as wifi
+    state "Creating software temperature sensor" as temp
+    state "Creating HomeKit accessory" as home
+    state "Setup" as setup
+    state "Loop" as loop
+    state "Handle button state" as button
+    state "Get temperature from sensor" as get
+    state "Set temperature to accessory" as set
+    state "Wait for 10 seconds" as wait
+    state "Try detecting hardware sensor" as try
+
+    state setup {
+        [*] --> wifi
+        wifi --> temp: WiFi connected
+        wifi --> [*]: WiFi not connected
+        temp --> home: Temperature sensor created
+        home --> [*]: HomeKit accessory created
     }
 
-    [*] --> Booting
-    Booting --> Running: boot successful
-    Running --> [*]: reset button pressed
-    Booting --> [*]: boot failed
+    state temp {
+        [*] --> try
+        try --> try: Sensor not found
+        try --> [*]: Sensor found
+    }
+
+    state loop {
+        [*] --> button
+        button --> get: No button pressed
+        button --> [*]: Button pressed
+        get --> set: Temperature received
+        get --> wait: Temperature not received
+        set --> wait: Temperature sent
+        wait --> button: Delay finished
+    }
+
+    [*] --> setup
+    setup --> loop: setup successful
+    loop --> [*]: reset button pressed
+    setup --> [*]: setup failed
 ```
-
-- Booting: the temperature sensor tries to connect to the WiFi, then creates the driver for the DS18B20 sensor and declares the accessory to the HomeKit system.
-- Running: Reads the state of the _reset button_, read the temperature and publishes the value to the HomeKit accessory.
