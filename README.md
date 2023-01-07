@@ -14,9 +14,6 @@ This temperature sensor uses these components:
 ## States
 
 ```mermaid
----
-title: State machine of the temperature sensor
----
 stateDiagram-v2
     state Booting {
         [*] --> ConnectingWiFi
