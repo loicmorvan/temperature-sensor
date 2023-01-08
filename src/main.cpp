@@ -2,49 +2,62 @@
 #include <TemperatureSensor.h>
 #include <WiFi.h>
 #include <HomeKitAccessory.h>
+#include <Dispatcher.h>
+#include <ButtonController.h>
+#include <TricolorController.h>
 
 #include "credentials.h"
 
-TemperatureSensor *temperatureSensor;
-HomeKitAccessory *homeKitAccessory;
+Dispatcher *dispatcher;
+unsigned long lastTime;
 
 void setup()
 {
-	Serial.begin(115200);
+	auto tricolorController = new TricolorController();
+	tricolorController->SetColor(0, 0, 255);
 
 	WiFi.begin(SSID, PASSWORD);
-	Serial.write("Establishing connection to WiFi...");
 	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(1000);
-		Serial.write('.');
 	}
-	Serial.println("connected!");
 
-	temperatureSensor = new TemperatureSensor();
-	homeKitAccessory = new HomeKitAccessory();
+	tricolorController->SetColor(0, 255, 255);
 
-	pinMode(14, INPUT);
+	auto temperatureSensor = new TemperatureSensor();
+	auto homeKitAccessory = new HomeKitAccessory();
+	auto buttonController = new ButtonController();
+
+	dispatcher = new Dispatcher();
+
+	dispatcher->StartTimer(TimeSpan::FromSeconds(10), [=]()
+						   {
+		auto temperature = temperatureSensor->GetTemperature();
+		if (temperature.HasValue)
+		{
+			tricolorController->SetColor(0, 0, 0);
+			homeKitAccessory->SetTemperature(temperature.Value);
+		}
+		else
+		{
+			tricolorController->SetColor(255, 0, 0);
+			// Temperature sensor lost
+		} });
+
+	dispatcher->StartTimer(TimeSpan::FromMilliseconds(100), [=]()
+						   {
+		if (buttonController->IsButtonPressed())
+		{
+			tricolorController->SetColor(255, 255, 0);
+			homeKitAccessory->ResetPairings();
+		} });
 }
 
 void loop()
 {
-	if (digitalRead(14) == HIGH)
-	{
-		homeKitAccessory->ResetPairings();
-	}
+	auto currentTime = millis();
+	dispatcher->Execute(TimeSpan::FromMilliseconds(currentTime - lastTime));
+	lastTime = currentTime;
 
-	auto temperature = temperatureSensor->GetTemperature();
-	if (temperature.HasValue)
-	{
-		homeKitAccessory->SetTemperature(temperature.Value);
-	}
-	else
-	{
-		// Temperature sensor lost
-	}
-
-	// Wait for 10s, need to find a way to check temperature at 0.1Hz,
-	// but still listen for the button at a higher framerate.
-	delay(10000);
+	delay(100);
 }
