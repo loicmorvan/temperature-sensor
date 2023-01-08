@@ -3,34 +3,29 @@
 #include <WiFi.h>
 #include <HomeKitAccessory.h>
 #include <Dispatcher.h>
+#include <ButtonController.h>
 
 #include "credentials.h"
 
-TemperatureSensor *temperatureSensor;
-HomeKitAccessory *homeKitAccessory;
 Dispatcher *dispatcher;
 unsigned long lastTime;
 
 void setup()
 {
 	Serial.begin(115200);
-
 	WiFi.begin(SSID, PASSWORD);
-	Serial.write("Establishing connection to WiFi...");
 	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(1000);
-		Serial.write('.');
 	}
-	Serial.println("connected!");
 
-	temperatureSensor = new TemperatureSensor();
-	homeKitAccessory = new HomeKitAccessory();
+	auto temperatureSensor = new TemperatureSensor();
+	auto homeKitAccessory = new HomeKitAccessory();
 
-	pinMode(14, INPUT);
+	auto buttonController = new ButtonController();
 
 	dispatcher = new Dispatcher();
-	dispatcher->StartTimer(TimeSpan::FromSeconds(10), []()
+	dispatcher->StartTimer(TimeSpan::FromSeconds(10), [=]()
 						   {
 		auto temperature = temperatureSensor->GetTemperature();
 		if (temperature.HasValue)
@@ -41,10 +36,12 @@ void setup()
 		{
 			// Temperature sensor lost
 		} });
-	dispatcher->StartTimer(TimeSpan::FromSeconds(1), []()
-						   { Serial.println("time 1s"); });
-	dispatcher->StartTimer(TimeSpan::FromSeconds(5), []()
-						   { Serial.println("time 5s"); });
+	dispatcher->StartTimer(TimeSpan::FromMilliseconds(100), [=]()
+						   {
+		if (buttonController->IsButtonPressed())
+		{
+			homeKitAccessory->ResetPairings();
+		} });
 }
 
 void loop()
@@ -52,11 +49,6 @@ void loop()
 	auto currentTime = millis();
 	dispatcher->Execute(TimeSpan::FromMilliseconds(currentTime - lastTime));
 	lastTime = currentTime;
-
-	if (digitalRead(14) == HIGH)
-	{
-		homeKitAccessory->ResetPairings();
-	}
 
 	delay(100);
 }
