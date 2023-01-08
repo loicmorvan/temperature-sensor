@@ -30,7 +30,8 @@ void setup()
 	pinMode(14, INPUT);
 
 	dispatcher = new Dispatcher();
-	dispatcher->StartTimer(TimeSpan::FromSeconds(10), [](){
+	dispatcher->StartTimer(TimeSpan::FromSeconds(10), []()
+						   {
 		auto temperature = temperatureSensor->GetTemperature();
 		if (temperature.HasValue)
 		{
@@ -39,20 +40,17 @@ void setup()
 		else
 		{
 			// Temperature sensor lost
-		}
-	});
-	dispatcher->StartTimer(TimeSpan::FromSeconds(1), [](){
-		Serial.println("time 1s");
-	});
-	dispatcher->StartTimer(TimeSpan::FromSeconds(5), [](){
-		Serial.println("time 5s");
-	});
+		} });
+	dispatcher->StartTimer(TimeSpan::FromSeconds(1), []()
+						   { Serial.println("time 1s"); });
+	dispatcher->StartTimer(TimeSpan::FromSeconds(5), []()
+						   { Serial.println("time 5s"); });
 }
 
 void loop()
 {
 	auto currentTime = millis();
-	dispatcher->Execute(TimeSpan::FromMilliseconds(lastTime - currentTime));
+	dispatcher->Execute(TimeSpan::FromMilliseconds(currentTime - lastTime));
 	lastTime = currentTime;
 
 	if (digitalRead(14) == HIGH)
