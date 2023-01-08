@@ -1,10 +1,10 @@
 #pragma once
 
 #include <TimeSpan.h>
+#include <functional>
 
-typedef void (*Handler)(void);
-
-class Dispatcher {
+class Dispatcher
+{
 private:
     struct Pimpl;
     Pimpl *pimpl;
@@ -13,5 +13,5 @@ public:
     Dispatcher();
 
     void Execute(TimeSpan elapsedTime);
-    void StartTimer(TimeSpan period, Handler handler);
+    void StartTimer(TimeSpan period, std::function<void()> handler);
 };

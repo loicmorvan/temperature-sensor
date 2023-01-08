@@ -6,7 +6,7 @@ struct DispatcherItem
 {
     TimeSpan period;
     TimeSpan time;
-    Handler handler;
+    std::function<void()> handler;
 
     void Execute(TimeSpan elapsedTime)
     {
@@ -37,7 +37,7 @@ void Dispatcher::Execute(TimeSpan elapsedTime)
     }
 }
 
-void Dispatcher::StartTimer(TimeSpan period, Handler handler)
+void Dispatcher::StartTimer(TimeSpan period, std::function<void()> handler)
 {
     auto item = new DispatcherItem();
     item->period = period;
