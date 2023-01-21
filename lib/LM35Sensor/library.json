@@ -1,0 +1,10 @@
+{
+    "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
+    "dependencies": [
+        {
+            "name": "LM35",
+            "owner": "ggzucco",
+            "version": "1.0.1"
+        }
+    ]
+}

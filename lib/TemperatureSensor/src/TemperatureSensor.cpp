@@ -25,7 +25,7 @@ TemperatureSensor::TemperatureSensor()
             ; // wait until device comes available.
     }
 
-    pimpl->sensor->setResolution(9);
+    pimpl->sensor->setResolution(12);
     pimpl->sensor->setConfig(DS18B20_CRC);
     pimpl->sensor->requestTemperatures();
 }
