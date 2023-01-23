@@ -10,5 +10,5 @@ private:
 
 public:
     LM35Sensor(unsigned char pin);
-    FloatValue GetTemperature();
+    float GetTemperature();
 };
